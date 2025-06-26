@@ -1,6 +1,6 @@
-// src/pages/MatchRequestPanel.jsx
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 export default function MatchRequestPanel() {
   const [requests, setRequests] = useState([]);
@@ -8,25 +8,36 @@ export default function MatchRequestPanel() {
 
   const fetchRequests = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/match/requests', {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/match/requests`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setRequests(res.data.requests);
     } catch (err) {
-      console.error('Fetch requests error:', err);
+      console.error('❌ Fetch requests error:', err);
+      toast.error('Failed to load match requests');
     }
   };
 
   const respondToRequest = async (senderId, action) => {
     try {
       await axios.post(
-        'http://localhost:5000/api/match/respond',
+        `${import.meta.env.VITE_API_URL}/api/match/respond`,
         { senderId, action },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
-      fetchRequests(); // Refresh
+
+      toast.success(
+        action === 'accepted'
+          ? '✅ Match request accepted!'
+          : '❌ Match request rejected.'
+      );
+
+      fetchRequests(); // Refresh list after action
     } catch (err) {
-      console.error('Respond error:', err);
+      console.error('❌ Respond error:', err);
+      toast.error('Failed to respond to match request');
     }
   };
 
@@ -36,28 +47,41 @@ export default function MatchRequestPanel() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto text-white">
-      <h2 className="text-3xl font-bold text-sky-400 mb-4">📥 Match Requests</h2>
+      <h2 className="text-3xl font-bold text-sky-400 mb-6">📥 Match Requests</h2>
+
       {requests.length === 0 ? (
         <p className="text-gray-400">No incoming match requests yet.</p>
       ) : (
         requests.map((req) => (
-          <div key={req._id} className="bg-gray-900 p-4 mb-4 rounded-lg shadow border border-gray-700 flex items-center justify-between">
+          <div
+            key={req._id}
+            className="bg-gray-900 p-4 mb-4 rounded-lg shadow border border-gray-700 flex items-center justify-between"
+          >
             <div className="flex items-center gap-4">
               <img
-                src={`http://localhost:5000/uploads/avatars/${req.avatar || 'default.png'}`}
+                src={`${import.meta.env.VITE_API_URL}/uploads/avatars/${req.avatar || 'default.png'}`}
                 alt={req.username}
                 className="w-12 h-12 rounded-full object-cover"
               />
               <div>
                 <h4 className="text-lg font-bold">{req.username}</h4>
-                <p className="text-sm text-gray-400">{req.bio}</p>
+                <p className="text-sm text-gray-400">
+                  {req.bio || 'No bio provided.'}
+                </p>
               </div>
             </div>
+
             <div className="flex gap-2">
-              <button onClick={() => respondToRequest(req._id, 'accepted')} className="bg-green-600 px-3 py-1 rounded hover:bg-green-700">
+              <button
+                onClick={() => respondToRequest(req._id, 'accepted')}
+                className="bg-green-600 hover:bg-green-700 px-4 py-1 rounded text-white font-medium transition"
+              >
                 ✅ Accept
               </button>
-              <button onClick={() => respondToRequest(req._id, 'rejected')} className="bg-red-600 px-3 py-1 rounded hover:bg-red-700">
+              <button
+                onClick={() => respondToRequest(req._id, 'rejected')}
+                className="bg-red-600 hover:bg-red-700 px-4 py-1 rounded text-white font-medium transition"
+              >
                 ❌ Reject
               </button>
             </div>

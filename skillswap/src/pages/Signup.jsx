@@ -35,7 +35,10 @@ const Signup = () => {
     }
 
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/signup', formData);
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/auth/signup`,
+        formData
+      );
       toast.success('🎉 Signup successful! Please login.');
       navigate('/login');
     } catch (err) {
@@ -45,12 +48,12 @@ const Signup = () => {
 
   return (
     <motion.div
-          className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white px-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
-          <div className="max-w-md w-full bg-gray-900 shadow-lg rounded-lg p-8 border border-gray-700">
-            <h2 className="text-3xl font-bold text-center mb-6">🚀 Create Your SkillSwap Account</h2>
+      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white px-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
+      <div className="max-w-md w-full bg-gray-900 shadow-lg rounded-lg p-8 border border-gray-700">
+        <h2 className="text-3xl font-bold text-center mb-6">🚀 Create Your SkillSwap Account</h2>
         <form onSubmit={handleSubmit}>
           <input
             name="username"

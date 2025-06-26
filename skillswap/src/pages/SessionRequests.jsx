@@ -14,7 +14,7 @@ export default function SessionRequests() {
 
   const fetchRequests = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/match/session-requests', {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/match/session-requests`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setRequests(res.data.requests || []);
@@ -26,7 +26,7 @@ export default function SessionRequests() {
 
   const joinSession = async (roomId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/match/session-request/${roomId}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/match/session-request/${roomId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -53,7 +53,7 @@ export default function SessionRequests() {
           >
             <div className="flex items-center gap-4">
               <img
-                src={`http://localhost:5000/uploads/avatars/${req.avatar || 'default.png'}`}
+                src={`${import.meta.env.VITE_API_URL}/uploads/avatars/${req.avatar || 'default.png'}`}
                 alt={req.username}
                 className="w-12 h-12 rounded-full object-cover"
               />

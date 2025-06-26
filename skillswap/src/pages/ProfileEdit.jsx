@@ -1,4 +1,3 @@
-// src/pages/ProfileEdit.jsx
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -14,14 +13,14 @@ export default function ProfileEdit() {
   useEffect(() => {
     if (!token) return;
     axios
-      .get('http://localhost:5000/api/user/me', {
+      .get(`${import.meta.env.VITE_API_URL}/api/user/me`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
         const { username, bio, avatar } = res.data;
         setFormData({ username, bio });
         if (avatar) {
-          setAvatarPreview(`http://localhost:5000/uploads/avatars/${avatar}`);
+          setAvatarPreview(`${import.meta.env.VITE_API_URL}/uploads/avatars/${avatar}`);
         }
       })
       .catch((err) => console.error('Failed to load profile:', err));
@@ -47,7 +46,7 @@ export default function ProfileEdit() {
     if (avatar) data.append('avatar', avatar);
 
     try {
-      await axios.put('http://localhost:5000/api/user/update', data, {
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/user/update`, data, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',

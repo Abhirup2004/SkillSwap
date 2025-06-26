@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import io from 'socket.io-client';
-import { jwtDecode } from 'jwt-decode'; // ✅ For decoding token
+import { jwtDecode } from 'jwt-decode';
 
 const NotificationContext = createContext();
 
@@ -26,7 +26,7 @@ export const NotificationProvider = ({ children }) => {
   useEffect(() => {
     if (!user?._id) return;
 
-    const newSocket = io('http://localhost:5000', {
+    const newSocket = io(import.meta.env.VITE_API_URL, {
       query: { token: localStorage.getItem('token') },
     });
 

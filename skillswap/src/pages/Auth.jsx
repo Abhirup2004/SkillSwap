@@ -1,46 +1,48 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { Formik, Form, Field, ErrorMessage } from 'formik'
-import * as Yup from 'yup'
-import axios from 'axios'
-import toast from 'react-hot-toast'
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Auth() {
-  const [isLogin, setIsLogin] = useState(true)
-  const navigate = useNavigate()
+  const [isLogin, setIsLogin] = useState(true);
+  const navigate = useNavigate();
 
   const loginSchema = Yup.object().shape({
     email: Yup.string().email('Invalid email').required('Required'),
     password: Yup.string().min(6, 'Min 6 characters').required('Required'),
-  })
+  });
 
   const signupSchema = Yup.object().shape({
     name: Yup.string().min(2).required('Required'),
     email: Yup.string().email('Invalid email').required('Required'),
     password: Yup.string().min(6).required('Required'),
-  })
+  });
 
   const handleLogin = async (values) => {
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', values)
-      localStorage.setItem('token', res.data.token)
-      toast.success('Login successful!')
-      navigate('/dashboard')
+      const res = await axios.post(`${API_URL}/api/auth/login`, values);
+      localStorage.setItem('token', res.data.token);
+      toast.success('Login successful!');
+      navigate('/dashboard');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Login failed')
+      toast.error(err.response?.data?.message || 'Login failed');
     }
-  }
+  };
 
   const handleSignup = async (values) => {
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/signup', values)
-      toast.success('Signup successful! You can now login')
-      setIsLogin(true)
+      await axios.post(`${API_URL}/api/auth/signup`, values);
+      toast.success('Signup successful! You can now login');
+      setIsLogin(true);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Signup failed')
+      toast.error(err.response?.data?.message || 'Signup failed');
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4 py-10">
@@ -121,5 +123,5 @@ export default function Auth() {
         )}
       </motion.div>
     </div>
-  )
+  );
 }

@@ -1,4 +1,3 @@
-// src/pages/SessionRoom.jsx
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Jutsu } from 'react-jutsu';
@@ -31,10 +30,10 @@ const SessionRoom = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        'http://localhost:5000/api/user/session-complete',
+        `${import.meta.env.VITE_API_URL}/api/user/session-complete`,
         {
           title: 'SkillSwap Video Session',
-          type: 'Taught', // you can later make this dynamic based on role
+          type: 'Taught', // can be made dynamic
         },
         {
           headers: {
@@ -60,7 +59,7 @@ const SessionRoom = () => {
             roomName={roomId}
             displayName="SkillSwap User"
             loadingComponent={<p className="text-center mt-10 text-gray-400">🔄 Connecting to session...</p>}
-            onMeetingEnd={handleMeetingEnd} // ✅ Call XP API
+            onMeetingEnd={handleMeetingEnd}
             containerStyles={{ width: '100%', height: '100%' }}
           />
         </div>

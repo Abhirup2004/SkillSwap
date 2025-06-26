@@ -1,11 +1,10 @@
-// src/components/Topbar.jsx
 import { useTheme } from '../context/ThemeContext';
 import { FiMoon, FiSun, FiLogOut, FiUser, FiGrid } from 'react-icons/fi';
 import { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
-import NotificationBell from '../components/NotificationBell'; // ✅ fixed path if it's in components
+import NotificationBell from '../components/NotificationBell';
 
 const Topbar = () => {
   const navigate = useNavigate();
@@ -25,12 +24,12 @@ const Topbar = () => {
         const decoded = jwtDecode(token);
         setUsername(decoded.username || 'User');
 
-        const res = await axios.get('http://localhost:5000/api/user/me', {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/user/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
         if (res.data.avatar) {
-          setAvatar(`http://localhost:5000/uploads/avatars/${res.data.avatar}`);
+          setAvatar(`${import.meta.env.VITE_API_URL}/uploads/avatars/${res.data.avatar}`);
         }
       } catch (err) {
         console.error('Topbar fetch error:', err);
@@ -65,17 +64,13 @@ const Topbar = () => {
       </Link>
 
       <div className="relative flex items-center gap-4" ref={dropdownRef}>
-        {/* ✅ Notification Bell added here */}
         <NotificationBell />
 
         <span className="text-gray-800 dark:text-gray-300 hidden sm:inline transition-colors duration-300">
           👋 Hello, {username}
         </span>
 
-        <button
-          onClick={() => setDropdownOpen(!dropdownOpen)}
-          className="focus:outline-none"
-        >
+        <button onClick={() => setDropdownOpen(!dropdownOpen)} className="focus:outline-none">
           {avatar ? (
             <img
               src={avatar}

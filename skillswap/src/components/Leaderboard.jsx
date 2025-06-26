@@ -3,13 +3,15 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function Leaderboard() {
   const [leaders, setLeaders] = useState([]);
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/user/leaderboard');
+        const res = await axios.get(`${API_URL}/api/user/leaderboard`);
         setLeaders(res.data.leaderboard);
       } catch (err) {
         console.error('Failed to fetch leaderboard:', err);
@@ -35,7 +37,7 @@ export default function Leaderboard() {
                 <img
                   src={
                     user.avatar
-                      ? `http://localhost:5000/uploads/avatars/${user.avatar}`
+                      ? `${API_URL}/uploads/avatars/${user.avatar}`
                       : '/default-avatar.png'
                   }
                   alt="avatar"

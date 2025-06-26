@@ -6,7 +6,7 @@ import {
   FaHandshake,
   FaInbox,
   FaHistory,
-  FaTrophy, // ✅ Trophy Icon Added
+  FaTrophy,
 } from 'react-icons/fa';
 import { TbVideoPlus } from 'react-icons/tb';
 import { Link, useLocation } from 'react-router-dom';
@@ -25,7 +25,7 @@ const Sidebar = () => {
   useEffect(() => {
     const checkSessionRequests = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/match/session-requests', {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/match/session-requests`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -70,8 +70,6 @@ const Sidebar = () => {
         <Link to="/dashboard/settings" className={`flex items-center gap-3 ${isActive('/dashboard/settings')}`}>
           <FaCog /> Settings
         </Link>
-
-        {/* ✅ Trophy Room Link */}
         <Link to="/dashboard/trophies" className={`flex items-center gap-3 ${isActive('/dashboard/trophies')}`}>
           <FaTrophy /> Trophy Room
         </Link>

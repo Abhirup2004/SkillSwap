@@ -10,7 +10,7 @@ export default function SkillSuggestions() {
     const fetchSuggestions = async () => {
       const token = localStorage.getItem('token');
       try {
-        const res = await axios.get('http://localhost:5000/api/user/suggestions', {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/user/suggestions`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setSuggestions(res.data.suggestions || []);

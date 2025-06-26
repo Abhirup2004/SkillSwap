@@ -1,15 +1,14 @@
-// src/pages/MatchHistory.jsx
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import { useNotification } from '../context/NotificationContext';
-import ChatPanel from './ChatPanel'; // ✅ Import ChatPanel
+import ChatPanel from './ChatPanel';
 
 export default function MatchHistory() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState(null); // ✅ Selected chat user
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const token = localStorage.getItem('token');
   const { socket, user } = useNotification();
@@ -17,9 +16,12 @@ export default function MatchHistory() {
   useEffect(() => {
     const fetchMatches = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/match/matches', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/match/matches`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setMatches(res.data.matches || []);
       } catch (err) {
         console.error('Error fetching match history:', err);
@@ -35,7 +37,7 @@ export default function MatchHistory() {
   const requestToJoin = async (receiverId, roomId, username) => {
     try {
       await axios.post(
-        'http://localhost:5000/api/match/send-session-request',
+        `${import.meta.env.VITE_API_URL}/api/match/send-session-request`,
         { toUserId: receiverId },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -76,13 +78,15 @@ export default function MatchHistory() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <img
-                  src={`http://localhost:5000/uploads/avatars/${match.avatar || 'default.png'}`}
+                  src={`${import.meta.env.VITE_API_URL}/uploads/avatars/${match.avatar || 'default.png'}`}
                   alt={match.username}
                   className="w-12 h-12 rounded-full object-cover"
                 />
                 <div>
                   <h4 className="text-lg font-bold">{match.username}</h4>
-                  <p className="text-sm text-gray-400">{match.bio || 'No bio provided.'}</p>
+                  <p className="text-sm text-gray-400">
+                    {match.bio || 'No bio provided.'}
+                  </p>
                 </div>
               </div>
 
@@ -102,16 +106,19 @@ export default function MatchHistory() {
                 </button>
 
                 <button
-                  onClick={() => setSelectedUser(match)}
+                  onClick={() =>
+                    setSelectedUser((prev) =>
+                      prev?._id === match._id ? null : match
+                    )
+                  }
                   className="bg-sky-600 hover:bg-sky-700 text-white px-3 py-2 rounded"
                 >
-                  💬 Message
+                  💬 {selectedUser?._id === match._id ? 'Close Chat' : 'Message'}
                 </button>
               </div>
             </div>
 
-            {/* ✅ Render ChatPanel below the match card if selected */}
-            {selectedUser && selectedUser._id === match._id && (
+            {selectedUser?._id === match._id && (
               <div className="mt-4">
                 <ChatPanel selectedUser={selectedUser} />
               </div>

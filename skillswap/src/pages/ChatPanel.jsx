@@ -6,7 +6,7 @@ import { PaperPlaneIcon, FaceIcon } from '@radix-ui/react-icons';
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 
-const socket = io('http://localhost:5000', { withCredentials: true });
+const socket = io(import.meta.env.VITE_SOCKET_URL, { withCredentials: true });
 
 export default function ChatPanel({ selectedUser }) {
   const [messages, setMessages] = useState([]);
@@ -33,14 +33,13 @@ export default function ChatPanel({ selectedUser }) {
     const fetchMessages = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/chat/messages/${selectedUser._id}`,
+          `${import.meta.env.VITE_API_URL}/api/chat/messages/${selectedUser._id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
         setMessages(res.data);
 
-        // ✅ Mark all received messages as delivered
         res.data.forEach((msg) => {
           if (
             msg.receiver._id === currentUserId &&
@@ -50,7 +49,6 @@ export default function ChatPanel({ selectedUser }) {
           }
         });
 
-        // ✅ Emit "seen" if current user is viewing this chat
         socket.emit('messageSeen', {
           from: selectedUser._id,
           to: currentUserId,
@@ -72,7 +70,6 @@ export default function ChatPanel({ selectedUser }) {
       if (isRelevant) {
         setMessages((prev) => [...prev, msg]);
 
-        // ✅ Emit delivery confirmation if I am the receiver
         if (msg.receiver._id === currentUserId && msg.status !== 'delivered') {
           socket.emit('messageDelivered', { messageId: msg._id });
         }
@@ -106,7 +103,7 @@ export default function ChatPanel({ selectedUser }) {
 
     try {
       await axios.post(
-        'http://localhost:5000/api/chat/send',
+        `${import.meta.env.VITE_API_URL}/api/chat/send`,
         {
           receiverId: selectedUser._id,
           content: input,
@@ -129,10 +126,9 @@ export default function ChatPanel({ selectedUser }) {
 
   return (
     <div className="w-full max-w-lg bg-gradient-to-br from-[#0f172a]/70 to-[#1e293b]/80 backdrop-blur border border-sky-500/30 shadow-xl rounded-2xl p-4 text-white flex flex-col h-[500px] overflow-hidden animate-fade-in">
-      {/* Header */}
       <div className="flex items-center gap-4 mb-3 border-b border-sky-500/20 pb-2">
         <img
-          src={`http://localhost:5000/uploads/avatars/${selectedUser.avatar || 'default.png'}`}
+          src={`${import.meta.env.VITE_API_URL}/uploads/avatars/${selectedUser.avatar || 'default.png'}`}
           alt={selectedUser.username}
           className="w-10 h-10 rounded-full object-cover border border-sky-400 shadow-sm"
         />
@@ -142,7 +138,6 @@ export default function ChatPanel({ selectedUser }) {
         </div>
       </div>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto pr-1 space-y-2 custom-scrollbar transition-all">
         {messages.map((msg, idx) => (
           <div key={msg._id || idx}>
@@ -155,7 +150,6 @@ export default function ChatPanel({ selectedUser }) {
             >
               {msg.content}
             </div>
-            {/* ✅ Read receipt indicator */}
             {msg.sender._id === currentUserId && (
               <div className="text-[10px] text-right pr-2 text-sky-300 italic">
                 {msg.status === 'read'
@@ -170,14 +164,12 @@ export default function ChatPanel({ selectedUser }) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Emoji Picker */}
       {showEmojiPicker && (
         <div className="absolute bottom-24 left-4 z-50">
           <Picker data={data} onEmojiSelect={addEmoji} theme="dark" />
         </div>
       )}
 
-      {/* Input */}
       <div className="flex mt-4 border-t border-sky-500/20 pt-3 relative">
         <button
           onClick={() => setShowEmojiPicker((prev) => !prev)}

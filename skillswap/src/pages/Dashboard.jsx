@@ -3,7 +3,7 @@ import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
 import ChatPanel from './ChatPanel';
 import SkillSuggestions from '../components/SkillSuggestions';
-import Leaderboard from '../components/Leaderboard'; // ✅ NEW import
+import Leaderboard from '../components/Leaderboard';
 import { MessageCircleIcon, X } from 'lucide-react';
 
 export default function Dashboard() {
@@ -27,8 +27,7 @@ export default function Dashboard() {
         if (!token) return;
 
         const decoded = jwtDecode(token);
-
-        const profileRes = await axios.get('http://localhost:5000/api/user/me', {
+        const profileRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/user/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -62,6 +61,7 @@ export default function Dashboard() {
 
         {/* XP & Stats */}
         <div className="grid gap-6 md:grid-cols-3 mb-12">
+          {/* XP Card */}
           <div className="bg-gray-900 rounded-2xl p-6 shadow-lg text-center">
             <h2 className="text-4xl font-bold text-sky-400">{user.xp}</h2>
             <p className="text-gray-400 mt-2">Total XP</p>
@@ -72,15 +72,19 @@ export default function Dashboard() {
                   style={{ width: `${progressToNextLevel}%` }}
                 ></div>
               </div>
-              <p className="text-xs text-gray-400 mt-1">{xpRemaining} XP to level up</p>
+              <p className="text-xs text-gray-400 mt-1">
+                {xpRemaining} XP to level up
+              </p>
             </div>
           </div>
 
+          {/* Level Card */}
           <div className="bg-gray-900 rounded-2xl p-6 shadow-lg text-center">
             <h2 className="text-4xl font-bold text-sky-400">Lv. {user.level}</h2>
             <p className="text-gray-400 mt-2">Current Level</p>
           </div>
 
+          {/* Badges Card */}
           <div className="bg-gray-900 rounded-2xl p-6 shadow-lg text-center">
             <h2 className="text-lg font-bold text-sky-400 mb-2">🏅 Badges</h2>
             <div className="flex flex-wrap justify-center gap-2">

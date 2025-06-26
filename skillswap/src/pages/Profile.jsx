@@ -22,15 +22,16 @@ export default function Profile() {
   const [skillsToLearn, setSkillsToLearn] = useState([]);
   const [avatar, setAvatar] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
-  const [message, setMessage] = useState('');
-  const token = localStorage.getItem('token');
+  const [message, setMessage] = useState({ text: '', type: '' });
 
-  // 🔄 Load profile data
+  const token = localStorage.getItem('token');
+  const API = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const fetchProfile = async () => {
       if (!token) return;
       try {
-        const res = await axios.get('http://localhost:5000/api/user/me', {
+        const res = await axios.get(`${API}/api/user/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -40,11 +41,11 @@ export default function Profile() {
         setSkillsToLearn(skillsToLearn || []);
 
         if (avatar) {
-          setAvatarPreview(`http://localhost:5000/uploads/avatars/${avatar}`);
+          setAvatarPreview(`${API}/uploads/avatars/${avatar}`);
         }
       } catch (err) {
-        console.error('❌ Error loading profile:', err);
-        setMessage('❌ Failed to load profile.');
+        console.error('❌ Profile load failed:', err);
+        setMessage({ text: '❌ Failed to load profile.', type: 'error' });
       }
     };
 
@@ -65,6 +66,7 @@ export default function Profile() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage({ text: '', type: '' });
 
     const data = new FormData();
     data.append('username', formData.username);
@@ -74,7 +76,7 @@ export default function Profile() {
     if (avatar) data.append('avatar', avatar);
 
     try {
-      const res = await axios.put('http://localhost:5000/api/user/update', data, {
+      const res = await axios.put(`${API}/api/user/update`, data, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
@@ -82,15 +84,16 @@ export default function Profile() {
       });
 
       const { username, avatar: newAvatar } = res.data;
-      setMessage('✅ Profile updated successfully!');
       setFormData((prev) => ({ ...prev, username }));
+      setMessage({ text: '✅ Profile updated successfully!', type: 'success' });
 
       if (newAvatar) {
-        setAvatarPreview(`http://localhost:5000/uploads/avatars/${newAvatar}`);
+        setAvatarPreview(`${API}/uploads/avatars/${newAvatar}`);
       }
     } catch (err) {
       console.error('❌ Update failed:', err);
-      setMessage('❌ Failed to update profile.');
+      const msg = err.response?.data?.message || '❌ Failed to update profile.';
+      setMessage({ text: msg, type: 'error' });
     }
   };
 
@@ -99,8 +102,14 @@ export default function Profile() {
       <div className="max-w-2xl mx-auto bg-gray-900 p-8 rounded-2xl shadow-xl">
         <h2 className="text-3xl font-bold text-center mb-8 text-sky-400">Edit Your Profile</h2>
 
-        {message && (
-          <div className="mb-6 text-center text-md font-medium text-green-400">{message}</div>
+        {message.text && (
+          <div
+            className={`mb-6 text-center text-md font-medium ${
+              message.type === 'success' ? 'text-green-400' : 'text-red-400'
+            }`}
+          >
+            {message.text}
+          </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -115,7 +124,7 @@ export default function Profile() {
           )}
 
           <div>
-            <label className="block text-sm mb-1">Change Avatar</label>
+            <label className="block text-sm mb-1 font-medium">Change Avatar</label>
             <input
               type="file"
               accept="image/*"
@@ -125,7 +134,7 @@ export default function Profile() {
           </div>
 
           <div>
-            <label className="block text-sm mb-1">Username</label>
+            <label className="block text-sm mb-1 font-medium">Username</label>
             <input
               type="text"
               name="username"
@@ -137,7 +146,7 @@ export default function Profile() {
           </div>
 
           <div>
-            <label className="block text-sm mb-1">Bio</label>
+            <label className="block text-sm mb-1 font-medium">Bio</label>
             <textarea
               name="bio"
               value={formData.bio}
@@ -148,7 +157,7 @@ export default function Profile() {
           </div>
 
           <div>
-            <label className="block text-sm mb-1">Skills to Teach</label>
+            <label className="block text-sm mb-1 font-medium">Skills to Teach</label>
             <Select
               options={skillOptions}
               isMulti
@@ -159,7 +168,7 @@ export default function Profile() {
           </div>
 
           <div>
-            <label className="block text-sm mb-1">Skills to Learn</label>
+            <label className="block text-sm mb-1 font-medium">Skills to Learn</label>
             <Select
               options={skillOptions}
               isMulti
