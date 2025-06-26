@@ -21,19 +21,48 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-// ✅ Setup Socket.io with deployed frontend
+// ✅ Handle CORS manually for API + Preflight
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://skill-swap-amber.vercel.app');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  if (req.method === 'OPTIONS') return res.sendStatus(200);
+  next();
+});
+
+// ✅ Express middleware
+app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// ✅ API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/match', matchRequestRoutes);
+app.use('/api/chat', chatRoutes);
+
+// ✅ Root Test Route
+app.get('/', (req, res) => {
+  res.send('SkillSwap API is live');
+});
+
+// ✅ MongoDB Connection
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch((err) => console.error('❌ MongoDB connection error:', err.message));
+
+// ✅ Socket.io Setup with correct CORS
 const io = new Server(server, {
   cors: {
-    origin: [
-      'http://localhost:5173',
-      'https://skill-swap-amber.vercel.app', // ✅ deployed frontend URL
-    ],
+    origin: 'https://skill-swap-amber.vercel.app',
     methods: ['GET', 'POST'],
     credentials: true,
   },
+  path: '/socket.io',
 });
 
-// ✅ Socket.io Events
+// ✅ Real-time Socket.io Events
 io.on('connection', (socket) => {
   console.log('🔌 A user connected');
 
@@ -80,36 +109,7 @@ io.on('connection', (socket) => {
 // ✅ Attach io to app
 app.set('io', io);
 
-// ✅ Middleware
-app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'https://skill-swap-amber.vercel.app', // ✅ deployed frontend URL
-  ],
-  credentials: true,
-}));
-app.options('*', cors()); // ✅ Enable preflight for all routes
-app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// ✅ API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/user', userRoutes);
-app.use('/api/match', matchRequestRoutes);
-app.use('/api/chat', chatRoutes);
-
-// ✅ Root Route
-app.get('/', (req, res) => {
-  res.send('SkillSwap API is live');
-});
-
-// ✅ Connect to MongoDB
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch((err) => console.error('❌ MongoDB connection error:', err.message));
-
-// ✅ Start the server
+// ✅ Start server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
