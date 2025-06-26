@@ -23,7 +23,7 @@ const server = http.createServer(app);
 // ✅ Setup Socket.io
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173', 'https://skillswap-frontend.vercel.app'],
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -33,13 +33,11 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
   console.log('🔌 A user connected');
 
-  // Join personal room
   socket.on('joinRoom', (userId) => {
     socket.join(userId);
     console.log(`👤 User joined room: ${userId}`);
   });
 
-  // ✅ Real-time Message Handler (from DB → emit)
   socket.on('sendMessage', async ({ from, to, content }) => {
     try {
       const newMessage = new Message({ sender: from, receiver: to, content });
@@ -57,22 +55,18 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 👀 Typing Indicator Handler
   socket.on('typing', ({ to, from }) => {
     io.to(to).emit('userTyping', { from });
   });
 
-  // ✅ NEW: Mark messages as "read" when recipient opens chat
   socket.on('messageSeen', async ({ from, to }) => {
     try {
-      const updated = await Message.updateMany(
+      await Message.updateMany(
         { sender: from, receiver: to, status: { $ne: 'read' } },
         { $set: { status: 'read' } }
       );
 
       console.log(`👁️‍🗨️ Messages from ${from} to ${to} marked as read.`);
-
-      // Notify sender to update message status
       io.to(from).emit('messagesRead', { by: to });
     } catch (err) {
       console.error('❌ Message seen error:', err.message);
@@ -80,27 +74,25 @@ io.on('connection', (socket) => {
   });
 });
 
-// ✅ Make io available in routes
 app.set('io', io);
 
-// ✅ Middlewares
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(cors({
+  origin: ['http://localhost:5173', 'https://skillswap-frontend.vercel.app'],
+  credentials: true
+}));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// ✅ API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/match', matchRequestRoutes);
 app.use('/api/chat', chatRoutes);
 
-// ✅ Connect MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log('✅ MongoDB connected'))
   .catch((err) => console.error('❌ MongoDB connection error:', err.message));
 
-// ✅ Start server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
