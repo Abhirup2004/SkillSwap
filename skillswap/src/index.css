@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ✅ Wave Animation Background */
+@keyframes waveAnimation {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.wave-bg {
+  background: linear-gradient(90deg, #38bdf8, #6366f1, #ec4899, #38bdf8);
+  background-size: 200% 100%;
+  animation: waveAnimation 10s linear infinite;
+}
+
+/* ✅ Smooth Theme Transition */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body {
+  @apply bg-white text-black dark:bg-background dark:text-white transition-colors duration-300;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* ✅ Fix Jitsi iframe overlap issue */
+.jitsi-container > iframe {
+  width: 100% !important;
+  height: 100% !important;
+  position: relative !important;
+}
+
+/* ✅ Slide-in Animations for Chat Panel & Messages */
+@keyframes slide-in-up {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-up {
+  animation: slide-in-up 0.4s ease-out;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.3s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+}
